@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="manifest" href="./web3.json">
+  <script>
+    // service workerが有効なら、service-worker.js を登録します
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').then(function () { console.log('Service Worker Registered'); });
+    }
+  </script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>現在状況表示</title>
+  <!-- <meta property="og:type" content="ページのタイプを記載"> ←後で入力-->
+  <link rel="icon" href="favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link href="　" rel="stylesheet">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <style>
+    #statusBox {
+      padding: 60px;
+      font-size: 132px;
+      font-weight: bold;
+      text-align: center;
+      color: white;
+    }
+
+    .status-実施中 {
+      background-color: red;
+      color: white;
+    }
+
+    .status-準備中 {
+      background-color: rgb(255, 166, 0);
+      color: white;
+    }
+
+    .status-案内可 {
+      background-color: green;
+      color: white;
+    }
+
+    .status-その他 {
+      background-color: gray;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>現在の状況</h1>
+  <div id="statusBox" class="status-その他">状態を確認中...</div>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxqUKKJ7UtMgeQ3eQlHv_lidXJIOg7e5MB00bIv0LeRW7f1H1naeB1PKnTFMbuWCNee/exec";
+    const box = document.getElementById("statusBox");
+
+    function updateStatus() {
+      fetch(GAS_URL)
+        .then(res => res.text())
+        .then(status => {
+          box.textContent = status;
+          // すべてのstatus-クラスを削除
+          box.className = '';
+          // 状態に応じたクラスを追加（ない場合は status-その他）
+          const className = "status-" + (status || "その他");
+          if (["status-実施中", "status-準備中", "status-案内可"].includes(className)) {
+            box.classList.add(className);
+          } else {
+            box.classList.add("status-その他");
+          }
+        });
+    }
+
+    setInterval(updateStatus, 1000);
+  </script>
+</body>
+
+</html>

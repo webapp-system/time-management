@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head><title>Web2 - 動画再生</title></head>
+<body>
+  <video id="myVideo" width="640" height="360" controls style="display: none;">
+    <source src="time.mp4" type="video/mp4">
+    お使いのブラウザは video タグに対応していません。
+  </video>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxqUKKJ7UtMgeQ3eQlHv_lidXJIOg7e5MB00bIv0LeRW7f1H1naeB1PKnTFMbuWCNee/exec";
+    const video = document.getElementById("myVideo");
+
+    // 現在の状態を保持
+    let currentStatus = null;
+
+    async function checkStatus() {
+      try {
+        const res = await fetch(GAS_URL);
+        const status = await res.text();
+
+        if (status === "実施中") {
+          if (currentStatus !== "実施中") {
+            // 状態が「実施中」に変わったので動画表示＆再生
+            video.style.display = "block";
+            try {
+              await video.play();
+            } catch (e) {
+              console.log("動画再生エラー:", e);
+            }
+          }
+        } else {
+          // 状態が「実施中」以外なら動画停止＆非表示
+          if (currentStatus === "実施中") {
+            video.pause();
+            video.currentTime = 0;
+            video.style.display = "none";
+          }
+        }
+
+        currentStatus = status;
+      } catch (err) {
+        console.error("状態取得エラー:", err);
+      }
+    }
+
+    // 1秒に1回状態チェックしてリアルタイムに近づける
+    setInterval(checkStatus, 1000);
+
+    // ページ読み込み時にも即チェック
+    checkStatus();
+  </script>
+</body>
+</html>
