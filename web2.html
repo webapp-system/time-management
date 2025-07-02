@@ -48,7 +48,7 @@
 
 <body>
 
-  <h1>動画再生準備</h1>
+  <h1>動画再生確認</h1>
   <p>最初にボタンを押して動画の再生許可をしてください。</p>
   <button onclick="initVideo()">再生を許可する</button>
 
@@ -78,7 +78,7 @@
     function startMonitoring() {
       setInterval(async () => {
         try {
-          const res = await fetch("https://script.google.com/macros/s/AKfycbXXXXXX/exec"); // ← ここにあなたのGAS URL
+          const res = await fetch("https://script.google.com/macros/s/AKfycbxqUKKJ7UtMgeQ3eQlHv_lidXJIOg7e5MB00bIv0LeRW7f1H1naeB1PKnTFMbuWCNee/exec"); // ← ここにあなたのGAS URL
           const status = await res.text();
 
           if (status.trim() === "実施中") {
