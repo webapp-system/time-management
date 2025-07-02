@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="ja">
 <head>
-  <link rel="manifest" href="./web2.json">
+    <link rel="manifest" href="./web2.json">
   <script>
     // service workerが有効なら、service-worker.js を登録します
     if ('serviceWorker' in navigator) {
@@ -13,77 +12,62 @@
   <title>動画再生</title>
   <!-- <meta property="og:type" content="ページのタイプを記載"> ←後で入力-->
   <link rel="icon" href="favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon2.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon4.png">
   <link href="　" rel="stylesheet">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <style>
-    .body {
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    video {
-      display: none;
-      width: 80%;
-      max-width: 600px;
-      margin-top: 20px;
-    }
-
+    body { text-align: center; font-family: sans-serif; padding: 2em; }
+    video { width: 80%; border: 2px solid #ccc; border-radius: 12px; }
     button {
+      margin-top: 1em;
       padding: 1em 2em;
       font-size: 1.2em;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
+      background-color: #3498db; color: white;
+      border: none; border-radius: 8px; cursor: pointer;
     }
-
-    button:hover {
-      background-color: #2980b9;
-    }
+    button:hover { background-color: #2980b9; }
   </style>
 </head>
-
 <body>
 
-  <h1>動画再生確認</h1>
-  <p>最初にボタンを押して動画の再生許可をしてください。</p>
-  <button onclick="initVideo()">再生を許可する</button>
-
-  <video id="myVideo" muted playsinline>
-    <source src="time.mp4" type="video/mp4">
-    お使いのブラウザは video タグをサポートしていません。
-  </video>
+  <h1>動画自動再生の準備</h1>
+  <p>初回のみボタンをタップしてください（音声再生の許可）</p>
+  <video id="video" src="time.mp4" controls playsinline></video><br>
+  <button onclick="enablePlayback()">再生を許可する</button>
 
   <script>
-    const video = document.getElementById("myVideo");
-    let started = false;
+    const video = document.getElementById("video");
 
-    function initVideo() {
+    function enablePlayback() {
+      // 初回タップで再生（許可を得る）
+      video.muted = false;
       video.play().then(() => {
-        video.pause(); // すぐ停止 → Safariが以後の自動再生を許可
+        video.pause();
         video.currentTime = 0;
+
+        // ボタン非表示
         document.querySelector("button").style.display = "none";
-        document.querySelector("p").textContent = "状態を監視中です…";
-        video.style.display = "block";
+        document.querySelector("p").textContent = "状態を監視中…";
+
+        // 自動再生処理開始
         startMonitoring();
-        started = true;
-      }).catch((e) => {
-        alert("再生許可が必要です。もう一度押してください。");
+      }).catch(err => {
+        alert("再生許可に失敗しました。もう一度タップしてください。");
+        console.error(err);
       });
     }
 
     function startMonitoring() {
       setInterval(async () => {
         try {
-          const res = await fetch("https://script.google.com/macros/s/AKfycbxqUKKJ7UtMgeQ3eQlHv_lidXJIOg7e5MB00bIv0LeRW7f1H1naeB1PKnTFMbuWCNee/exec"); // ← ここにあなたのGAS URL
+          const res = await fetch("https://script.google.com/macros/s/AKfycbxqUKKJ7UtMgeQ3eQlHv_lidXJIOg7e5MB00bIv0LeRW7f1H1naeB1PKnTFMbuWCNee/exec"); // ← 状態取得URL
           const status = await res.text();
 
           if (status.trim() === "実施中") {
             if (video.paused) {
-              video.play().catch(() => { });
+              video.play().catch(() => {});
             }
           } else {
             if (!video.paused) {
@@ -92,11 +76,11 @@
             }
           }
         } catch (e) {
-          console.error("ステータス取得失敗:", e);
+          console.error("ステータス取得エラー:", e);
         }
-      }, 2000); // 2秒ごとにチェック
+      }, 2000); // 2秒ごとにステータス確認
     }
   </script>
-</body>
 
+</body>
 </html>
