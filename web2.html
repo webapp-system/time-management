@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <link rel="manifest" href="./web2.json">
   <script>
@@ -25,10 +26,10 @@
 </head>
 
 <body>
-  <video id="myVideo" width="640" height="360" controls style="display: none;">
+  <video id="myVideo" width="640" height="360" muted playsinline style="display: none;">
     <source src="time.mp4" type="video/mp4">
-    お使いのブラウザは video タグに対応していません。
   </video>
+
 
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxqUKKJ7UtMgeQ3eQlHv_lidXJIOg7e5MB00bIv0LeRW7f1H1naeB1PKnTFMbuWCNee/exec";
@@ -74,4 +75,5 @@
     checkStatus();
   </script>
 </body>
+
 </html>
