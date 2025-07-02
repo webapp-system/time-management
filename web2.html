@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html>
-<head><title>Web2 - 動画再生</title></head>
+<head>
+  <link rel="manifest" href="./web2.json">
+  <script>
+    // service workerが有効なら、service-worker.js を登録します
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').then(function () { console.log('Service Worker Registered'); });
+    }
+  </script>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>動画再生</title>
+  <!-- <meta property="og:type" content="ページのタイプを記載"> ←後で入力-->
+  <link rel="icon" href="favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon2.png">
+  <link href="　" rel="stylesheet">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <style>
+    .body {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+  </style>
+</head>
+
 <body>
   <video id="myVideo" width="640" height="360" controls style="display: none;">
     <source src="time.mp4" type="video/mp4">
