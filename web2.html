@@ -22,57 +22,80 @@
     .body {
       font-family: Arial, Helvetica, sans-serif;
     }
+
+    video {
+      display: none;
+      width: 80%;
+      max-width: 600px;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 1em 2em;
+      font-size: 1.2em;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
 
 <body>
-  <video id="myVideo" width="640" height="360" muted playsinline style="display: none;">
+
+  <h1>動画再生準備</h1>
+  <p>最初にボタンを押して動画の再生許可をしてください。</p>
+  <button onclick="initVideo()">再生を許可する</button>
+
+  <video id="myVideo" muted playsinline>
     <source src="time.mp4" type="video/mp4">
+    お使いのブラウザは video タグをサポートしていません。
   </video>
 
-
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxqUKKJ7UtMgeQ3eQlHv_lidXJIOg7e5MB00bIv0LeRW7f1H1naeB1PKnTFMbuWCNee/exec";
     const video = document.getElementById("myVideo");
+    let started = false;
 
-    // 現在の状態を保持
-    let currentStatus = null;
-
-    async function checkStatus() {
-      try {
-        const res = await fetch(GAS_URL);
-        const status = await res.text();
-
-        if (status === "実施中") {
-          if (currentStatus !== "実施中") {
-            // 状態が「実施中」に変わったので動画表示＆再生
-            video.style.display = "block";
-            try {
-              await video.play();
-            } catch (e) {
-              console.log("動画再生エラー:", e);
-            }
-          }
-        } else {
-          // 状態が「実施中」以外なら動画停止＆非表示
-          if (currentStatus === "実施中") {
-            video.pause();
-            video.currentTime = 0;
-            video.style.display = "none";
-          }
-        }
-
-        currentStatus = status;
-      } catch (err) {
-        console.error("状態取得エラー:", err);
-      }
+    function initVideo() {
+      video.play().then(() => {
+        video.pause(); // すぐ停止 → Safariが以後の自動再生を許可
+        video.currentTime = 0;
+        document.querySelector("button").style.display = "none";
+        document.querySelector("p").textContent = "状態を監視中です…";
+        video.style.display = "block";
+        startMonitoring();
+        started = true;
+      }).catch((e) => {
+        alert("再生許可が必要です。もう一度押してください。");
+      });
     }
 
-    // 1秒に1回状態チェックしてリアルタイムに近づける
-    setInterval(checkStatus, 1000);
+    function startMonitoring() {
+      setInterval(async () => {
+        try {
+          const res = await fetch("https://script.google.com/macros/s/AKfycbXXXXXX/exec"); // ← ここにあなたのGAS URL
+          const status = await res.text();
 
-    // ページ読み込み時にも即チェック
-    checkStatus();
+          if (status.trim() === "実施中") {
+            if (video.paused) {
+              video.play().catch(() => { });
+            }
+          } else {
+            if (!video.paused) {
+              video.pause();
+              video.currentTime = 0;
+            }
+          }
+        } catch (e) {
+          console.error("ステータス取得失敗:", e);
+        }
+      }, 2000); // 2秒ごとにチェック
+    }
   </script>
 </body>
 
