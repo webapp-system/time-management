@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-    <link rel="manifest" href="./web2.json">
+  <link rel="manifest" href="./web2.json">
   <script>
     // service workerが有効なら、service-worker.js を登録します
     if ('serviceWorker' in navigator) {
@@ -18,40 +19,72 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <style>
-    body { text-align: center; font-family: sans-serif; padding: 2em; }
-    video { width: 80%; border: 2px solid #ccc; border-radius: 12px; }
+    body {
+      text-align: center;
+      font-family: sans-serif;
+      padding: 2em;
+    }
+
+    video {
+      width: 80%;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+    }
+
     button {
       margin-top: 1em;
       padding: 1em 2em;
       font-size: 1.2em;
-      background-color: #3498db; color: white;
-      border: none; border-radius: 8px; cursor: pointer;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
     }
-    button:hover { background-color: #2980b9; }
+
+    button:hover {
+      background-color: #2980b9;
+    }
   </style>
 </head>
-<body>
 
-  <h1>動画自動再生の準備</h1>
-  <p>初回のみボタンをタップしてください（音声再生の許可）</p>
-  <video id="video" src="time.mp4" controls playsinline></video><br>
-  <button onclick="enablePlayback()">再生を許可する</button>
+<body>
+  <div style="text-align:center; font-family:sans-serif; padding:2em;">
+    <h1>動画再生の準備</h1>
+    <p id="message">初回のみボタンをタップしてください（音声再生の許可）</p>
+
+    <video id="video" controls playsinline style="width:80%; border:2px solid #ccc; border-radius:12px;"></video><br>
+
+    <button id="startButton" onclick="enablePlayback()"
+      style="margin-top:1em; padding:1em 2em; font-size:1.2em; background-color:#3498db; color:white; border:none; border-radius:8px; cursor:pointer;">
+      再生を許可する
+    </button>
+  </div>
 
   <script>
     const video = document.getElementById("video");
+    const videoFiles = ["video1.mp4", "video2.mp4"];
+    const message = document.getElementById("message");
+    const startButton = document.getElementById("startButton");
+    let currentVideo = "";
+
+    function pickRandomVideo() {
+      const index = Math.floor(Math.random() * videoFiles.length);
+      return videoFiles[index];
+    }
 
     function enablePlayback() {
-      // 初回タップで再生（許可を得る）
+      currentVideo = pickRandomVideo();
+      video.src = currentVideo;
       video.muted = false;
+
       video.play().then(() => {
         video.pause();
         video.currentTime = 0;
 
-        // ボタン非表示
-        document.querySelector("button").style.display = "none";
-        document.querySelector("p").textContent = "状態を監視中…";
+        startButton.style.display = "none";
+        message.textContent = "状態を監視中…";
 
-        // 自動再生処理開始
         startMonitoring();
       }).catch(err => {
         alert("再生許可に失敗しました。もう一度タップしてください。");
@@ -62,12 +95,14 @@
     function startMonitoring() {
       setInterval(async () => {
         try {
-          const res = await fetch("https://script.google.com/macros/s/AKfycbxqUKKJ7UtMgeQ3eQlHv_lidXJIOg7e5MB00bIv0LeRW7f1H1naeB1PKnTFMbuWCNee/exec"); // ← 状態取得URL
+          const res = await fetch("https://script.google.com/macros/s/AKfycbxqUKKJ7UtMgeQ3eQlHv_lidXJIOg7e5MB00bIv0LeRW7f1H1naeB1PKnTFMbuWCNee/exec");
           const status = await res.text();
 
           if (status.trim() === "実施中") {
             if (video.paused) {
-              video.play().catch(() => {});
+              currentVideo = pickRandomVideo();
+              video.src = currentVideo;
+              await video.play();
             }
           } else {
             if (!video.paused) {
@@ -78,9 +113,9 @@
         } catch (e) {
           console.error("ステータス取得エラー:", e);
         }
-      }, 2000); // 2秒ごとにステータス確認
+      }, 2000);
     }
   </script>
-
 </body>
+
 </html>
